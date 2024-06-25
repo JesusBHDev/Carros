@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Predicción del Precio del Automóvil</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #000000;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #00FF00;
+        }
+        button{
+            margin-bottom: 25px;
+        }
+
+        .container {
+            background-color: #111111;
+            margin-top: 20px;
+            padding: 40px 20px; 
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+            width: 650px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #00FF00;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            color: #00FF00;
+        }
+
+        .input-group {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+        }
+
+        .input-group input[type="text"] {
+            width: 80%;
+            padding: 8px;
+            border: 1px solid #00FF00;
+            border-radius: 4px;
+            background-color: #222222;
+            color: #00FF00;
+            margin-left: 5px; /* Agregar margen izquierdo */
+            margin-right: 15px; /* Agregar margen derecho */
+        }
+
+        input[type="submit"], button {
+            width: calc(50% - 10px);
+            padding: 10px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 4px;
+            background-color: #00FF00;
+            color: #000000;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover, button:hover {
+            background-color: #45a049;
+        }
+
+        p#resultado {
+            margin-top: 20px;
+            color: #ffffff;
+            font-weight: bold;
+        }
+    </style>
+<script>
+    function predecirPrecio(event) {
+        event.preventDefault();
+        const enginesize = document.getElementById('enginesize').value;
+        const curbweight = document.getElementById('curbweight').value;
+        const horsepower = document.getElementById('horsepower').value;
+        const highwaympg = document.getElementById('highwaympg').value;
+        const carwidth = document.getElementById('carwidth').value;
+        const stroke = document.getElementById('stroke').value;
+        const peakrpm = document.getElementById('peakrpm').value;
+        const carheight = document.getElementById('carheight').value;
+        const boreratio = document.getElementById('boreratio').value;
+        const symboling = document.getElementById('symboling').value;
+
+        fetch('/predict', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `enginesize=${enginesize}&curbweight=${curbweight}&horsepower=${horsepower}&highwaympg=${highwaympg}&carwidth=${carwidth}&stroke=${stroke}&peakrpm=${peakrpm}&carheight=${carheight}&boreratio=${boreratio}&symboling=${symboling}`,
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                document.getElementById('resultado').innerText = 'Error: ' + data.error;
+            } else {
+                document.getElementById('resultado').innerText = 'Predicción del Precio: ' + data.prediccion;
+            }
+        })
+        .catch(error => {
+            document.getElementById('resultado').innerText = 'Error en la solicitud.';
+            console.error('Error:', error);
+        });
+    }
+
+    function generarValorAleatorio(min, max) {
+            return (Math.random() * (max - min) + min).toFixed(6);
+        }
+
+        function rellenarCamposAleatorios() {
+            document.getElementById('enginesize').value = generarValorAleatorio(-2, 2);
+            document.getElementById('curbweight').value = generarValorAleatorio(-2, 2);
+            document.getElementById('horsepower').value = generarValorAleatorio(-2, 2);
+            document.getElementById('highwaympg').value = generarValorAleatorio(-2, 2);
+            document.getElementById('carwidth').value = generarValorAleatorio(-2, 2);
+            document.getElementById('stroke').value = generarValorAleatorio(-2, 2);
+            document.getElementById('peakrpm').value = generarValorAleatorio(-2, 2);
+            document.getElementById('carheight').value = generarValorAleatorio(-2, 2);
+            document.getElementById('boreratio').value = generarValorAleatorio(-2, 2);
+            document.getElementById('symboling').value = generarValorAleatorio(-2, 2);
+        }
+</script>
+</head>
+<body>
+<div class="container">
+    <h1>Predicción del Precio del Automóvil</h1>
+    <h4>Modelo de Neurona </h4>
+
+    <button onclick="rellenarCamposAleatorios()">Rellenar Campos</button>
+    <form id="formulario" onsubmit="predecirPrecio(event)">
+        <div class="input-group">
+            <label for="enginesize">Tamaño del Motor:</label>
+            <input type="text" id="enginesize" name="enginesize">
+            <label for="curbweight">Peso en Vacío:</label>
+            <input type="text" id="curbweight" name="curbweight">
+            <label for="horsepower">Potencia:</label>
+            <input type="text" id="horsepower" name="horsepower">
+        </div>
+        <div class="input-group">
+            <label for="highwaympg">Consumo en Carretera (MPG):</label>
+            <input type="text" id="highwaympg" name="highwaympg">
+            <label for="carwidth">Ancho del Automóvil:</label>
+            <input type="text" id="carwidth" name="carwidth">
+            <label for="stroke">Carrera del Pistón:</label>
+            <input type="text" id="stroke" name="stroke">
+        </div>
+        <div class="input-group">
+            <label for="peakrpm">Revoluciones Máximas (RPM):</label>
+            <input type="text" id="peakrpm" name="peakrpm">
+            <label for="carheight">Altura del Automóvil:</label>
+            <input type="text" id="carheight" name="carheight">
+            <label for="boreratio">Relación Diámetro del Cilindro:</label>
+            <input type="text" id="boreratio" name="boreratio">
+        </div>
+        <div class="input-group">
+            <label for="symboling">Símbolo:</label>
+            <input type="text" id="symboling" name="symboling">
+        </div>
+        
+        <input type="submit" value="Predecir">
+    </form>
+    
+    <p id="resultado"></p>
+
+    <h4>Jesus Ivan Bautista Hernandez 9º "B"</h4>
+</div>
+</body>
+</html>
