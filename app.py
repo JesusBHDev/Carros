@@ -1,16 +1,23 @@
 from flask import Flask, request, render_template, jsonify
-import joblib
 import pandas as pd
 import logging
+from tensorflow.keras.models import model_from_json
 
 app = Flask(__name__)
 
 # Configurar el registro
 logging.basicConfig(level=logging.DEBUG)
 
-# Cargar el modelo entrenado
-model = joblib.load('model.pkl')
+# Cargar el modelo desde JSON y los pesos desde HDF5
+json_file = open('model.json', 'r')
+loaded_model_json = json_file.read()
+json_file.close()
+loaded_model = model_from_json(loaded_model_json)
+loaded_model.load_weights("model.weights.h5")
 app.logger.debug('Modelo cargado correctamente.')
+
+# Compilar el modelo cargado
+loaded_model.compile(loss='mean_squared_error', optimizer='adam')
 
 @app.route('/')
 def home():
@@ -37,14 +44,14 @@ def predict():
         app.logger.debug(f'DataFrame creado: {data_df}')
         
         # Realizar predicciones
-        prediction = model.predict(data_df)
-        app.logger.debug(f'Predicción: {prediction[0]}')
+        prediction = loaded_model.predict(data_df)
+        app.logger.debug(f'Predicción: {prediction[0][0]}')
         
         # Convertir la predicción a float
         prediction_float = float(prediction[0][0])
         
         # Devolver las predicciones como respuesta JSON
-        return jsonify({'prediccion': prediction_float}) # Usar .item() para obtener el valor como un escalar
+        return jsonify({'prediccion': prediction_float})
     except Exception as e:
         app.logger.error(f'Error en la predicción: {str(e)}')
         return jsonify({'error': str(e)}), 400
